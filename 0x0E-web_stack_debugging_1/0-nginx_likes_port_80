@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# configure nginx to run and listen on port 80
+
+cat /var/log/nginx/error.log
+rm etc/nginx/sites-enabled/default
+cp etc/nginx/sites-available/default etc/nginx/sites-enabled/default
+service nginx restart
