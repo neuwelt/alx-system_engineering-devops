@@ -1,12 +1,9 @@
----
-# 0x09. Web infrastructure design
+# Web infrastructure design
 
----
-File Name|Description
----|---
-0-simple_web_stack|Design a one server web infrastructure that hosts the website that is reachable via www.foobar.com. Start your explanation by having a user wanting to access your website.
-1-distributed_web_infrastructure|Design a three server web infrastructure that hosts the website www.foobar.com.|
-2-secured_and_monitored_web_infrastructure| Design a three server web infrastructure that hosts the website www.foobar.com, it must be secured, serve encrypted traffic, and be monitored.
-3-scale_up|
+This was a week-long project in which I began to research web infrastructure
+design. As I conducted research on different design principles, I
+whiteboarded diagrams of a developing web infrastructure. I started with a
+simple LAMP model and ended with a fully distributed, monitored, and secured
+system.
 
-
+Files in this project contain links to each respective whiteboard diagram.

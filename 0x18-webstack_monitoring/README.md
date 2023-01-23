@@ -1,8 +1,16 @@
-# 0x18. Webstack monitoring
+# Webstack monitoring
 
-Web stack monitoring can be broken down into 2 categories:
+This project invovled setting up Sumo Logic accounts to monitor server traffic
+on my three HolbertonBnB servers.
 
-Application monitoring: getting data about your running software and making sure it is behaving as expected
-Server monitoring: getting data about your virtual or physical server and making sure they are not overloaded (could be CPU, memory, disk or network overload)
+## Tasks :page_with_curl:
 
-- 2-setup_datadog: dashboard with different metrics displayed in order to get a few different visualizations.
+* **0. Monitor your Nginx traffic**
+  * [0-monitor_your_nginx_traffic](./0-monitor_your_nginx_traffic): Text file containing
+  my Sumo Logic access key.
+    * First line: `Access ID`
+    * Second line: `Access Key`
+
+* **1. Monitor your server**
+  * For this task, I configured Sumo Logic to monitor my server's memory, CPU, network
+  and disk.

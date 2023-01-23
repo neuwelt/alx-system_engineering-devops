@@ -1,27 +1,65 @@
-## Centric Data Hosting Outage Incident Report.
+# Postmortem
 
-### Issue Summary 
-From 2nd July 15:26 CAT to 3rd July 16:00, 2020 all emails and website inaccessible. This was due to the migration of the hosting server. Resulting in an outage during critical business hours. 100% of users were affected. Users could not access their websites receive email as DNS was still propagating.
+Upon the release of Holberton School's System Engineering & DevOps project 0x19,
+approximately 00:07 Pacific Standard Time (PST), an outage occurred on an isolated
+Ubuntu 14.04 container running an Apache web server. GET requests on the server led to
+`500 Internal Server Error`'s, when the expected response was an HTML file defining a
+simple Holberton WordPress site.
 
-### Timeline
-- 15:00 CAT - migration is initiated.
-- 15:26 CAT - customer called in a complaint saying they we awaiting a critical email.
-- 16:00 CAT - discovered that emails and website migration were initiated at the same time.
-- No escalation was needed as the Chief System Admin initiated the migration himself.
-- 16:30 CAT decision was taken to allow full propagation.
-- 3 July 16:00 CAT DNS had fully propagated and all websites and emails fully restored.
+## Debugging Process
 
-### Root cause 
-At 15:00 CAT on the 2nd of July, the server migration was initiated resulting in a change of nameservers. By 15:26 CAT users were no longer receiving emails as the DNS had started propagating. DNS takes some hours to propagate.
+Bug debugger Brennan (BDB... as in my actual initials... made that up on the spot, pretty
+good, huh?) encountered the issue upon opening the project and being, well, instructed to
+address it, roughly 19:20 PST. He promptly proceeded to undergo solving the problem.
 
-### Resolution
-The only course of action was to allow DNS to fully propagate which took about 24 hours. Due to the fact that tenancy on the old servers was due to expire on the 5th of July. The default solution was to allow propagation to take its course and monitor if anything breaks during the process. By 16:00 CAT on the 3rd of July, all users reported they were now able to fully access emails and websites.
+1. Checked running processes using `ps aux`. Two `apache2` processes - `root` and `www-data` -
+were properly running.
 
-### Corrective and preventative measures
-Through investigation, we were able to ascertain that we should develop a better migration plan and warn clients/users in advance of the intended migration/maintenance. The following would be included in the migration plan:
-- Create a list of clients/users and their business critical hours.
-- Using the gathered information determine what would be the best time to perform the migration.
-- Create a rollout plan on how the migration would be performed and services will be migrated first.
-- Alert all users/clients of possible outages during the determined hours. 
-- Rollout migration on stated dates and times and according to the plan.
+2. Looked in the `sites-available` folder of the `/etc/apache2/` directory. Determined that
+the web server was serving content located in `/var/www/html/`.
 
+3. In one terminal, ran `strace` on the PID of the `root` Apache process. In another, curled
+the server. Expected great things... only to be disappointed. `strace` gave no useful
+information.
+
+4. Repeated step 3, except on the PID of the `www-data` process. Kept expectations lower this
+time... but was rewarded! `strace` revelead an `-1 ENOENT (No such file or directory)` error
+occurring upon an attempt to access the file `/var/www/html/wp-includes/class-wp-locale.phpp`.
+
+5. Looked through files in the `/var/www/html/` directory one-by-one, using Vim pattern
+matching to try and locate the erroneous `.phpp` file extension. Located it in the
+`wp-settings.php` file. (Line 137, `require_once( ABSPATH . WPINC . '/class-wp-locale.php' );`).
+
+6. Removed the trailing `p` from the line.
+
+7. Tested another `curl` on the server. 200 A-ok!
+
+8. Wrote a Puppet manifest to automate fixing of the error.
+
+## Summation
+
+In short, a typo. Gotta love'em. In full, the WordPress app was encountering a critical
+error in `wp-settings.php` when tyring to load the file `class-wp-locale.phpp`. The correct
+file name, located in the `wp-content` directory of the application folder, was
+`class-wp-locale.php`.
+
+Patch involved a simple fix on the typo, removing the trailing `p`.
+
+## Prevention
+
+This outage was not a web server error, but an application error. To prevent such outages
+moving forward, please keep the following in mind.
+
+* Test! Test test test. Test the application before deploying. This error would have arisen
+and could have been addressed earlier had the app been tested.
+
+* Status monitoring. Enable some uptime-monitoring service such as
+[UptimeRobot](./https://uptimerobot.com/) to alert instantly upon outage of the website.
+
+Note that in response to this error, I wrote a Puppet manifest
+[0-strace_is_your_friend.pp](https://github.com/bdbaraban/holberton-system_engineering-devops/blob/master/0x17-web_stack_debugging_3/0-strace_is_your_friend.pp)
+to automate fixing of any such identitical errors should they occur in the future. The manifest
+replaces any `phpp` extensions in the file `/var/www/html/wp-settings.php` with `php`.
+
+But of course, it will never occur again, because we're programmers, and we never make
+errors! :wink:
