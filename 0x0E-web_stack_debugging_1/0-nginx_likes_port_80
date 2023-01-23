@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# Configures an Nginx server to listen on port 80.
+# Using your debugging skills, find out what’s keeping your Ubuntu container’s
+# Nginx installation from listening on port 80. Feel free to install whatever
+# tool you need, start and destroy as many containers as you need to debug the
+# issue. Then, write a Bash script with the minimum number of commands to
+# automate your fix.
 
-rm /etc/nginx/sites-enabled/default
-ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
-service nginx restart
+sed -i 's/8080/80/g' /etc/nginx/sites-enabled/default
+sudo service nginx restart

@@ -1,6 +1,3 @@
-# kills a process named killmenow
-node default{
-  exec {'killme':
-    command => '/usr/bin/pkill killmenow'
-  }
+# Kills a process
+exec { '/usr/bin/env pkill -9 killmenow':
 }

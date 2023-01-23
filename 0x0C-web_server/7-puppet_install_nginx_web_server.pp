@@ -1,24 +1,9 @@
-# Script to install nginx using puppet
+# install nginx
+exec {'/usr/bin/env apt-get -y update': }
+exec {'/usr/bin/env apt-get -y install nginx': }
+exec {'/usr/bin/env echo "Holberton School" > /var/www/html/index.nginx-debian.html': }
+exec {'/usr/bin/env sed -i "/server_name _;/ a\\\trewrite ^/redirect_me http://www.holbertonschool.com permanent;" /etc/nginx/sites-available/default': }
+exec {'/usr/bin/env sed -i "/server_name _;/ a\\\terror_page 404 /custom_404.html;" /etc/nginx/sites-available/default': }
+exec {'/usr/bin/env echo "Ceci n\'est pas une page" > /var/www/html/custom_404.html': }
+exec {'/usr/bin/env service nginx start': }
 
-package {'nginx':
-  ensure => 'present',
-}
-
-exec {'install':
-  command  => 'sudo apt-get update ; sudo apt-get -y install nginx',
-  provider => shell,
-}
-
-exec {'Hello World!':
-  command  => 'echo "Hello World!" | sudo tee /var/www/html/index.html',
-  provider => shell,
-}
-
-exec {'sudo sed -i "s/listen 80 default_server;/listen 80 default_server;\\n\\tlocation \/redirect_me {\\n\\t\\treturn 301 https:\/\/www.youtube.com\/;\\n\\t}/" /etc/nginx/sites-available/default':
-  provider => shell,
-}
-
-exec {'run':
-  command  => 'sudo service nginx restart',
-  provider => shell,
-}
